@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual-Pol Radar Variable Calculator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for vanilla JS -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Small custom style for range inputs */
+        input[type=range] {
+            accent-color: #0046AB; /* Custom theme accent */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800">
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-[#003c80] to-[#5d7d9e] rounded-2xl p-6 md:p-8 text-white shadow-lg">
+            <div class="flex items-center gap-3 mb-2">
+                <i data-lucide="radio" class="w-8 h-8 text-[#FFFFE3]"></i>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight">
+                    Dual-Pol Radar Variable Calculator
+                </h1>
+            </div>
+            <p class="text-[#FFFFE3]/90 max-w-2xl text-sm md:text-base">
+                Interactive dashboard for computing dual-polarization radar variables for single particles and assuming Rayleigh scattering.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Controls Column -->
+            <div class="lg:col-span-5 space-y-4 relative lg:after:absolute lg:after:top-0 lg:after:-right-3 lg:after:w-px lg:after:h-full lg:after:bg-slate-200">
+                <!-- Particle Type Toggle -->
+                <div class="flex items-center justify-center gap-2 mb-2 bg-white p-2 rounded-xl shadow-sm border border-slate-200">
+                    <label class="cursor-pointer flex-1 text-center">
+                        <input type="radio" name="ptype" value="rain" class="peer hidden" checked onchange="toggleInputs()">
+                        <div class="py-2 px-2 rounded-lg peer-checked:bg-[#0046AB] peer-checked:text-white font-semibold text-slate-500 transition-all text-sm sm:text-base">Rain</div>
+                    </label>
+                    <label class="cursor-pointer flex-1 text-center">
+                        <input type="radio" name="ptype" value="snow" class="peer hidden" onchange="toggleInputs()">
+                        <div class="py-2 px-2 rounded-lg peer-checked:bg-[#0046AB] peer-checked:text-white font-semibold text-slate-500 transition-all text-sm sm:text-base">Snow/Graupel</div>
+                    </label>
+                    <label class="cursor-pointer flex-1 text-center">
+                        <input type="radio" name="ptype" value="hail" class="peer hidden" onchange="toggleInputs()">
+                        <div class="py-2 px-2 rounded-lg peer-checked:bg-[#0046AB] peer-checked:text-white font-semibold text-slate-500 transition-all text-sm sm:text-base">Hail</div>
+                    </label>
+                </div>
+
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2 mb-4">
+                    <i data-lucide="settings-2" class="w-5 h-5 text-slate-500"></i>
+                    Shared Parameters
+                </h2>
+
+                <!-- Control: Diameter -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                    <div class="flex justify-between items-center text-slate-700 font-medium">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="cloud-rain" class="w-4 h-4 text-[#0046AB]"></i>
+                            Particle Equivolume Diameter
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <input type="number" id="num-D" value="1.0" min="0.1" max="8.0" step="0.1"
+                                class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
+                            <span class="text-slate-400 text-sm">mm</span>
+                        </div>
+                    </div>
+                    <input type="range" id="range-D" min="0.1" max="8.0" step="0.1" value="1.0"
+                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                </div>
+
+                <!-- Control: Wavelength -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                    <div class="flex justify-between items-center text-slate-700 font-medium">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="radio" class="w-4 h-4 text-[#0046AB]"></i>
+                            Radar Wavelength
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <input type="number" id="num-wave" value="110.0" min="10" max="200" step="1"
+                                class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
+                            <span class="text-slate-400 text-sm">mm</span>
+                        </div>
+                    </div>
+                    <input type="range" id="range-wave" min="10" max="200" step="1" value="110.0"
+                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                </div>
+
+                <!-- Control: Canting Angle -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                    <div class="flex justify-between items-center text-slate-700 font-medium">
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-[#0046AB]">
+                                <path d="M2 20 C 6 20 8 4 12 4 C 16 4 18 20 22 20" />
+                            </svg>
+                            Canting Angle Dist. Width
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <input type="number" id="num-sigma" value="8.0" min="0" max="45" step="1"
+                                class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
+                            <span class="text-slate-400 text-sm">°</span>
+                        </div>
+                    </div>
+                    <input type="range" id="range-sigma" min="0" max="45" step="1" value="8.0"
+                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                </div>
+
+                <!-- Rain Parameters -->
+                <div id="rain-inputs" class="space-y-4">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2 mt-2 mb-4">
+                        <i data-lucide="cloud-rain" class="w-5 h-5 text-slate-500"></i>
+                        Rain Parameters
+                    </h2>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                        <div class="flex justify-between items-center text-slate-700 font-medium">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="thermometer" class="w-4 h-4 text-[#0046AB]"></i>
+                                Temperature
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="num-T" value="0.0" min="-20" max="40" step="1"
+                                    class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
+                                <span class="text-slate-400 text-sm">°C</span>
+                            </div>
+                        </div>
+                        <input type="range" id="range-T" min="-20" max="40" step="1" value="0.0"
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+                </div>
+
+                <!-- Snow Parameters -->
+                <div id="snow-inputs" class="space-y-4 hidden">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2 mt-2 mb-4">
+                        <i data-lucide="snowflake" class="w-5 h-5 text-slate-500"></i>
+                        Snow/Graupel Parameters
+                    </h2>
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                        <div class="flex justify-between items-center text-slate-700 font-medium">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="circle-dashed" class="w-4 h-4 text-[#0046AB]"></i>
+                                Axis Ratio
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="num-snow-arm" value="0.6" min="0.2" max="1.0" step="0.01"
+                                    class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
+                            </div>
+                        </div>
+                        <input type="range" id="range-snow-arm" min="0.2" max="1.0" step="0.01" value="0.6"
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                        <div class="flex justify-between items-center text-slate-700 font-medium">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="boxes" class="w-4 h-4 text-[#0046AB]"></i>
+                                Snow/Graupel Density
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="num-density" value="100" min="10" max="800" step="10"
+                                    class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
+                                <span class="text-slate-400 text-sm">kg/m³</span>
+                            </div>
+                        </div>
+                        <input type="range" id="range-density" min="10" max="800" step="10" value="100"
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                        <div class="flex justify-between items-center text-slate-700 font-medium">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="droplet" class="w-4 h-4 text-[#0046AB]"></i>
+                                Meltwater Mass Fraction
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="num-snow-meltwater" value="0" min="0" max="100" step="1"
+                                    class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
+                                <span class="text-slate-400 text-sm">%</span>
+                            </div>
+                        </div>
+                        <input type="range" id="range-snow-meltwater" min="0" max="100" step="1" value="0"
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                        <div class="flex justify-between items-center text-slate-700 font-medium mb-1">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="blend" class="w-4 h-4 text-[#0046AB]"></i>
+                                Mixing Formula
+                            </div>
+                        </div>
+                        <select id="select-mixing" onchange="toggleMGOpts()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0046AB]">
+                            <option value="mg">Maxwell Garnett</option>
+                            <option value="pvs">Polder-van Santen</option>
+                        </select>
+                        <div id="mg-options" class="mt-2 space-y-2">
+                            <div class="text-sm font-medium text-slate-500">Maxwell Garnett Configuration</div>
+                            <select id="select-mg-bg" onchange="calculate()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0046AB]">
+                                <option value="snow">Background: Snow | Inclusions: Water</option>
+                                <option value="water">Background: Water | Inclusions: Snow</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hail Parameters -->
+                <div id="hail-inputs" class="space-y-4 hidden">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2 mt-2 mb-4">
+                        <i data-lucide="hexagon" class="w-5 h-5 text-slate-500"></i>
+                        Hail Parameters
+                    </h2>
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                        <div class="flex justify-between items-center text-slate-700 font-medium">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="circle-dashed" class="w-4 h-4 text-[#0046AB]"></i>
+                                Hail Axis Ratio
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="num-hail-arm" value="0.6" min="0.2" max="1.0" step="0.01"
+                                    class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
+                            </div>
+                        </div>
+                        <input type="range" id="range-hail-arm" min="0.2" max="1.0" step="0.01" value="0.6"
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3">
+                        <div class="flex justify-between items-center text-slate-700 font-medium">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="droplet" class="w-4 h-4 text-[#0046AB]"></i>
+                                Meltwater Mass Fraction
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="num-hail-meltwater" value="0" min="0" max="100" step="1"
+                                    class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
+                                <span class="text-slate-400 text-sm">%</span>
+                            </div>
+                        </div>
+                        <input type="range" id="range-hail-meltwater" min="0" max="100" step="1" value="0"
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Results Column -->
+            <div class="lg:col-span-7 space-y-6">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2 mb-4">
+                    <i data-lucide="activity" class="w-5 h-5 text-slate-500"></i>
+                    Computed Radar Variables
+                </h2>
+
+                <!-- Rayleigh Warning Banner -->
+                <div id="rayleigh-warning" class="hidden bg-yellow-50 border border-yellow-200 p-4 rounded-xl shadow-sm flex items-start gap-3 transition-all">
+                    <i data-lucide="triangle-alert" class="w-5 h-5 text-yellow-600 shrink-0 mt-0.5"></i>
+                    <div>
+                        <p class="font-bold text-sm text-yellow-900">Rayleigh Scattering Limit Exceeded</p>
+                        <p class="text-sm mt-1 text-yellow-800">The selected parameters fall outside the valid Rayleigh scattering regime (Resonance Parameter: <span id="rp-value" class="font-mono font-semibold">0.00</span> > 0.6).</p>
+                    </div>
+                </div>
+
+                <!-- Main Result Cards & Radar Plot Layout -->
+                <div class="flex flex-col gap-6">
+                    
+                    <!-- Variable Cards Column -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <!-- Reflectivity -->
+                        <div class="bg-white border border-slate-200 rounded-xl py-3 px-5 shadow-sm flex items-center justify-between relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-[#5d7d9e]/40 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10 text-slate-500 font-semibold text-sm md:text-base">
+                                Reflectivity (Z<sub>H</sub>)
+                            </div>
+                            <div class="relative z-10 text-right flex items-baseline gap-1.5">
+                                <div id="out-zh" class="text-2xl font-bold text-[#003c80] leading-none mb-0.5">0.00</div>
+                                <div class="text-sm font-medium text-slate-400 leading-none">dBZ</div>
+                            </div>
+                        </div>
+
+                        <!-- ZDR -->
+                        <div class="bg-white border border-slate-200 rounded-xl py-3 px-5 shadow-sm flex items-center justify-between relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-[#5d7d9e]/40 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10 text-slate-500 font-semibold text-sm md:text-base">
+                                Differential Reflectivity (Z<sub>DR</sub>)
+                            </div>
+                            <div class="relative z-10 text-right flex items-baseline gap-1.5">
+                                <div id="out-zdr" class="text-2xl font-bold text-[#003c80] leading-none mb-0.5">0.000</div>
+                                <div class="text-sm font-medium text-slate-400 leading-none">dB</div>
+                            </div>
+                        </div>
+
+                        <!-- KDP -->
+                        <div class="bg-white border border-slate-200 rounded-xl py-3 px-5 shadow-sm flex items-center justify-between relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-[#5d7d9e]/40 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10 text-slate-500 font-semibold text-sm md:text-base">
+                                Specific Differential Phase (K<sub>dp</sub>)
+                            </div>
+                            <div class="relative z-10 text-right flex items-baseline gap-1.5">
+                                <div id="out-kdp" class="text-2xl font-bold text-[#003c80] leading-none mb-0.5">0.00e+0</div>
+                                <div class="text-sm font-medium text-slate-400 leading-none">° / km</div>
+                            </div>
+                        </div>
+
+                        <!-- LDR -->
+                        <div class="bg-white border border-slate-200 rounded-xl py-3 px-5 shadow-sm flex items-center justify-between relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-[#5d7d9e]/40 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10 text-slate-500 font-semibold text-sm md:text-base">
+                                Linear Depolarization Ratio (LDR)
+                            </div>
+                            <div class="relative z-10 text-right flex items-baseline gap-1.5">
+                                <div id="out-ldr" class="text-2xl font-bold text-[#003c80] leading-none mb-0.5">0.00</div>
+                                <div class="text-sm font-medium text-slate-400 leading-none">dB</div>
+                            </div>
+                        </div>
+
+                        <!-- Specific Attenuation (AH) -->
+                        <div class="bg-white border border-slate-200 rounded-xl py-3 px-5 shadow-sm flex items-center justify-between relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-[#5d7d9e]/40 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10 text-slate-500 font-semibold text-sm md:text-base">
+                                Specific Attenuation (A<sub>H</sub>)
+                            </div>
+                            <div class="relative z-10 text-right flex items-baseline gap-1.5">
+                                <div id="out-ah" class="text-2xl font-bold text-[#003c80] leading-none mb-0.5">0.00e+0</div>
+                                <div class="text-sm font-medium text-slate-400 leading-none">dB / km</div>
+                            </div>
+                        </div>
+
+                        <!-- Correlation Coefficient (Rho_hv) -->
+                        <div class="bg-white border border-slate-200 rounded-xl py-3 px-5 shadow-sm flex items-center justify-between relative overflow-hidden group">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-[#5d7d9e]/40 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10 text-slate-500 font-semibold text-sm md:text-base">
+                                Correlation Coefficient (ρ<sub>hv</sub>)
+                            </div>
+                            <div class="relative z-10 text-right flex items-baseline gap-1.5">
+                                <div id="out-rhv" class="text-2xl font-bold text-[#003c80] leading-none mb-0.5">0.00000</div>
+                                <div class="text-sm font-medium text-slate-400 leading-none">Unitless</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Radar Plot Column -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col items-center">
+                        <div class="relative flex items-center justify-center w-full max-w-[380px] my-2">
+                            <svg viewBox="0 0 200 200" class="w-full overflow-visible text-[#0046AB]">
+                                <!-- Drawn by JS -->
+                                <g id="radar-grid" stroke="#cbd5e1" stroke-width="0.5" fill="none"></g>
+                                
+                                <!-- Axes Labels (Scaled up and nudged out to prevent clipping) -->
+                                <text x="100" y="10" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">Z<tspan baseline-shift="sub" font-size="7.5">H</tspan></text>
+                                <text x="100" y="20" text-anchor="middle" font-size="7" fill="#94a3b8">[-20, 80]</text>
+
+                                <text x="180" y="52" text-anchor="start" font-size="10" font-weight="bold" fill="#475569">Z<tspan baseline-shift="sub" font-size="7.5">DR</tspan></text>
+                                <text x="180" y="62" text-anchor="start" font-size="7" fill="#94a3b8">[0, 6]</text>
+
+                                <text x="180" y="138" text-anchor="start" font-size="10" font-weight="bold" fill="#475569">log₁₀(K<tspan baseline-shift="sub" font-size="7.5">dp</tspan>)</text>
+                                <text x="180" y="148" text-anchor="start" font-size="7" fill="#94a3b8">[-6, 2]</text>
+
+                                <text x="100" y="186" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">LDR</text>
+                                <text x="100" y="196" text-anchor="middle" font-size="7" fill="#94a3b8">[-40, -10]</text>
+
+                                <text x="20" y="138" text-anchor="end" font-size="10" font-weight="bold" fill="#475569">log₁₀(A<tspan baseline-shift="sub" font-size="7.5">H</tspan>)</text>
+                                <text x="20" y="148" text-anchor="end" font-size="7" fill="#94a3b8">[-8, 0]</text>
+
+                                <text x="20" y="52" text-anchor="end" font-size="10" font-weight="bold" fill="#475569">ρ<tspan baseline-shift="sub" font-size="7.5">hv</tspan></text>
+                                <text x="20" y="62" text-anchor="end" font-size="7" fill="#94a3b8">[0.95, 1.0]</text>
+
+                                <!-- Plot Data -->
+                                <polygon id="radar-poly" points="" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                                <circle cx="100" cy="100" r="1.5" fill="currentColor" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drop Visualization and Stats Panel -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center min-h-[220px]">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-6 w-full text-center">
+                            Particle Visualizer
+                        </h3>
+                        <div class="relative flex items-center justify-center flex-1 w-full mt-2">
+                            <svg viewBox="-12 -12 28 24" class="w-32 h-32 drop-shadow-md text-[#0046AB]" style="overflow: visible;">
+                                <defs>
+                                    <filter id="snow-texture">
+                                        <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="3" result="noise" />
+                                        <feColorMatrix type="matrix" values="
+                                            0.3 0 0 0 0.6
+                                            0.3 0 0 0 0.6
+                                            0.4 0 0 0 0.65
+                                            0   0 0 0 0.95" in="noise" result="coloredNoise" />
+                                        <feComposite operator="in" in="coloredNoise" in2="SourceGraphic" />
+                                    </filter>
+                                </defs>
+                                
+                                <!-- Snow Base Ellipse -->
+                                <ellipse id="svg-ellipse-snow" cx="0" cy="0" rx="8" ry="8" fill="white" filter="url(#snow-texture)" stroke="#82C8E5" stroke-width="0.5" opacity="0" />
+                                
+                                <!-- Hail Shell (Water) -->
+                                <ellipse id="svg-ellipse-hail-shell" cx="0" cy="0" rx="8" ry="8" fill="#0046AB" stroke="#5d7d9e" stroke-width="0.5" opacity="0" />
+                                <!-- Hail Core (Ice) -->
+                                <ellipse id="svg-ellipse-hail-core" cx="0" cy="0" rx="4" ry="4" fill="white" filter="url(#snow-texture)" stroke="#82C8E5" stroke-width="0.3" opacity="0" />
+
+                                <!-- Water Overlay Ellipse (Rain) -->
+                                <ellipse id="svg-ellipse" cx="0" cy="0" rx="8" ry="8" fill="currentColor" stroke="#0046AB" stroke-width="0.5" opacity="0.8" />
+                                
+                                <!-- Horizontal Dimension -->
+                                <line id="svg-line-h" x1="-8" y1="10" x2="8" y2="10" stroke="#82C8E5" stroke-width="0.3" stroke-dasharray="1,1" />
+                                <text id="svg-text-h" x="0" y="12.5" font-size="2" fill="#003c80" text-anchor="middle">1.0 mm</text>
+                                
+                                <!-- Vertical Dimension -->
+                                <line id="svg-line-v" x1="10" y1="-8" x2="10" y2="8" stroke="#82C8E5" stroke-width="0.3" stroke-dasharray="1,1" />
+                                <text id="svg-text-v" x="11" y="0" font-size="2" fill="#003c80" text-anchor="start" dominant-baseline="middle">1.0 mm</text>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#003c80] p-6 rounded-2xl shadow-sm border border-[#82C8E5]/50 text-slate-200 flex flex-col justify-start">
+                        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-6 text-center">
+                            Dielectric Constant
+                        </h3>
+                        
+                        <!-- Standard Rain/Snow Display -->
+                        <div id="dielectric-standard" class="space-y-3 font-mono text-sm">
+                            <div class="flex justify-between border-b border-[#82C8E5]/50 pb-1">
+                                <span class="text-[#FFFFE3]/90">ε (Real):</span>
+                                <span id="out-ew-real">0.0000</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[#FFFFE3]/90">ε (Imag):</span>
+                                <span id="out-ew-imag">0.0000</span>
+                            </div>
+                        </div>
+
+                        <!-- Hail 2-Layer Display -->
+                        <div id="dielectric-hail" class="space-y-3 font-mono text-sm hidden">
+                            <div class="flex justify-between border-b border-[#82C8E5]/50 pb-1">
+                                <span class="text-[#FFFFE3]/90">ε<sub>ice</sub> (R/I):</span>
+                                <span id="out-eps-i">3.170 / 0.001</span>
+                            </div>
+                            <div class="flex justify-between border-b border-[#82C8E5]/50 pb-1">
+                                <span class="text-[#FFFFE3]/90">ε<sub>water</sub> (R/I):</span>
+                                <span id="out-eps-w">0.000 / 0.000</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[#FFFFE3]/90">Meltwater AR:</span>
+                                <span id="out-ar-outer">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes & Documentation Section -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <details class="group">
+                <summary class="flex items-center justify-between cursor-pointer p-6 bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div class="flex items-center gap-2 font-bold text-slate-700">
+                        <i data-lucide="info" class="w-5 h-5 text-[#0046AB]"></i>
+                        Notes & Disclaimer
+                    </div>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-6 border-t border-slate-200 text-slate-600 space-y-4 text-sm leading-relaxed">
+                    <p>
+                        This dashboard is an implementation of the polarimetric radar forward operator described in <a href="https://doi.org/10.1175/2010JAMC2363.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Ryzhkov et al. (2011)</a> and is designed to help illustrate the behavior of the polarimetric radar variables as a function of various tunable radar and microphysical parameters.
+                    </p>
+                    <h4 class="font-bold text-slate-700 pt-2">Microphysical Treatments and Assumptions:</h4>
+                    <p><u>Dielectric constants</u>:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>The temperature-dependent complex dielectric constant of water is calculated according to <a href="https://doi.org/10.1364/AO.11.001836" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors"> Ray (1972)</a>.</li>
+                            <li>The complex dielectric constant of ice and air are assumed to be invariant to temperature and wavelength and fixed at values of 3.18+0.001<em>j</em> and 1.0006+0.0000005<em>j</em>, respectively.</li>
+                            <li>For snow and graupel with densities <span>&#8804;</span> solid ice, two mixing formula options are provided: 
+                                <a href="https://doi.org/10.1098/rsta.1904.0024" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors"> Maxwell Garnett (1904)</a> and 
+                                <a href="https://doi.org/10.1016/S0031-8914(46)80066-1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors"> Polder and van Santen (1946)</a>. 
+                                For both mixing formula options, the dielectric constant of dry snow is found according to Eq. (4) of <a href="https://doi.org/10.1175/2010JAMC2363.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Ryzhkov et al. (2011)</a>. 
+                                The <a href="https://doi.org/10.1098/rsta.1904.0024" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors"> Maxwell Garnett (1904)</a> mixing formula further requires the choice of which media (water vs. snow) is considered the background versus inclusions; 
+                                the <a href="https://doi.org/10.1016/S0031-8914(46)80066-1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors"> Polder and van Santen (1946)</a> formula is symmetric and does not require this delineation.</li>
+                            <li>Hail is assumed to have a density of solid ice (917 kg m<sup>-3</sup>), with meltwater accumulating on its surface. The temperature of the water shell is assumed to be 0°C.</li>
+                        </ul>
+                    <p><u>Orientations</u>:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>For all particles, the mean canting angle is assumed to be 0° (i.e., no preferred orientation). The adjustable canting angle distribution width refers to the 
+                                standard deviation of the distribution following Eq. (20) of <a href="https://doi.org/10.1175/2010JAMC2363.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Ryzhkov et al. (2011)</a>.</li>
+                        </ul>
+                    <p><u>Shapes</u>:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>All particles are assumed to be oblate spheroids with a maximum axis ratio of 1.0 (i.e., spherical).</li>
+                            <li>For rain, the axis ratio is constrained and found as a function of particle equivolume diameter following <a href="https://doi.org/10.1175/1520-0450(2005)44h186:Ci2.0.CO;2" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Brandes et al. (2005)</a>. The axis ratios
+                                of melting snow/graupel and dry hail are adjustable.</li>
+                            <li>For melting hail, a meltwater torus is approximated using Eq. (32) of <a href="https://doi.org/10.1175/JAS-D-25-0014.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Carlin and Ryzhkov (2025)</a>, 
+                                which adapts the meltwater model of <a href="https://doi.org/10.1175/JAMC-D-17-036.2.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Kumjian et al. (2018)</a> to meltwater values less than the critical threshold. 
+                                This model evenly distributes the liquid water around the hailstone whose shape is supplied by the user. If the meltwater thickness is <span>&#8804;</span> 0.5 mm, the water remains evenly distributed. Otherwise, 
+                                the meltwater thickness at the top and bottom of the particle are fixed at 0.5 mm and is allowed to increase on the particle’s equator down to a minimum axis ratio of 0.56. </li>
+                        </ul>
+                    <p><u>Scattering</u>:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>For simplicity, Rayleigh scattering is assumed for all particles; a warning will pop up to alert users when this condition is being violated (defined by the Resonance Parameter (RP) exceeding 0.6).</li>
+                            <li>For rain and snow/graupel, the Rayleigh forward- and back-scattering amplitudes are calculated according to Eq. (22) of <a href="https://doi.org/10.1175/2010JAMC2363.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Ryzhkov et al. (2011)</a>.</li>
+                            <li>For hail, the two-layer spheroid model of <a href="https://doi.org/10.1002/9783527618156" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Bohren and Huffman (1983)</a> 
+                                following Eq. (28) of <a href="https://doi.org/10.1175/2010JAMC2363.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Ryzhkov et al. (2011)</a>. </li>
+                            <li>Final radar variables are calculated following Eq. (29) of <a href="https://doi.org/10.1175/2010JAMC2363.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Ryzhkov et al. (2011)</a> and assuming <em>N(D)dD</em> = 1. </li>
+                        </ul>
+                    <p>
+                        <em>Disclaimer: This tool is intended for educational use only. No guarantees are made about the accuracy of the tool, and the user assumes all risk. This tool, as well as any views or opinions expressed herein, are those of the author and do not necessarily reflect those of OAR or the Department of Commerce.</em>
+                    </p>
+                </div>
+            </details>
+        </div>
+
+        <!-- Contact Info Footer -->
+        <div class="pt-6 pb-2 text-center text-sm text-slate-500">
+            For feedback and/or questions, please contact: <span class="font-semibold text-slate-700"><a href="https://inside.nssl.noaa.gov/profiles/entry/carlin-jacob/">Jacob Carlin</a></span> | <a href="mailto:jacob.carlin@noaa.gov" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">jacob.carlin@noaa.gov</a>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // --- Complex Number Helper Class ---
+        class Cplx {
+            constructor(r, i = 0) {
+                this.r = r;
+                this.i = i;
+            }
+            add(c) { return new Cplx(this.r + c.r, this.i + c.i); }
+            sub(c) { return new Cplx(this.r - c.r, this.i - c.i); }
+            mul(c) { return new Cplx(this.r * c.r - this.i * c.i, this.r * c.i + this.i * c.r); }
+            mulScalar(s) { return new Cplx(this.r * s, this.i * s); }
+            div(c) {
+                const den = c.r * c.r + c.i * c.i;
+                return new Cplx((this.r * c.r + this.i * c.i) / den, (this.i * c.r - this.r * c.i) / den);
+            }
+            conj() { return new Cplx(this.r, -this.i); }
+            abs() { return Math.sqrt(this.r * this.r + this.i * this.i); }
+            inv() { return new Cplx(1, 0).div(this); }
+            sqrt() {
+                const mag = this.abs();
+                const re = Math.sqrt((mag + this.r) / 2);
+                const im = (this.i < 0 ? -1 : 1) * Math.sqrt((mag - this.r) / 2);
+                return new Cplx(re, im);
+            }
+        }
+        const C = (r, i = 0) => new Cplx(r, i);
+
+        // --- Main Calculation Engine ---
+        function getWaterEps(t_c, wave_mm) {
+            const t = t_c + 273.15; // T in Kelvin
+            const t0 = 273.15;
+            const eps_0 = 8.854187e-12;
+            const pi = Math.PI;
+
+            const ew_eps_s = 78.54 * (1.0 - 4.579e-3 * (t - t0 - 25) + 1.19e-5 * Math.pow(t - t0 - 25, 2) - 2.8e-8 * Math.pow(t - t0 - 25, 3));
+            const ew_eps_inf = 5.27137 + 2.16474e-2 * (t - t0) - 1.31198e-3 * Math.pow(t - t0, 2);
+            const ew_alpha = (-16.8129 / t) + 6.09265e-2;
+            const ew_lambda = 3.3836e-6 * Math.exp(2513.98 / t);
+            const ew_sigma = 1.1117e-4;
+
+            const lw_term = ew_lambda / (0.001 * wave_mm);
+            const term1 = Math.pow(lw_term, 1 - ew_alpha);
+            const term2 = Math.pow(lw_term, 2 * (1 - ew_alpha));
+            const sin_a = Math.sin((ew_alpha * pi) / 2);
+            const cos_a = Math.cos((ew_alpha * pi) / 2);
+
+            const ew_real = ew_eps_inf + ((ew_eps_s - ew_eps_inf) * (1 + term1 * sin_a)) / (1 + 2 * term1 * sin_a + term2);
+            const ew_imag = ((ew_eps_s - ew_eps_inf) * (term1 * cos_a)) / (1 + 2 * term1 * sin_a + term2) + (ew_sigma * (0.001 * wave_mm)) / (2 * pi * 3e8 * eps_0);
+            return C(ew_real, ew_imag);
+        }
+
+        let radarGridDrawn = false;
+
+        function calculate() {
+            const pType = document.querySelector('input[name="ptype"]:checked').value;
+
+            // Get shared values from DOM
+            const D = parseFloat(document.getElementById('num-D').value);
+            const wave = parseFloat(document.getElementById('num-wave').value);
+            const sigma = parseFloat(document.getElementById('num-sigma').value);
+            const T = parseFloat(document.getElementById('num-T').value);
+            const density = parseFloat(document.getElementById('num-density').value);
+            const mix_form = document.getElementById('select-mixing').value;
+            const mg_bg = document.getElementById('select-mg-bg').value;
+            const pi = Math.PI;
+
+            let ew, arm, mw_frac = 0;
+            let eps_water_ref; 
+            let eps_w_0C, eps_i, AR_outer = 1.0;
+            let a_inner, b_inner, a_outer, b_outer;
+            let fhh, fvv; 
+
+            if (pType === 'rain') {
+                const raw_arm = 0.9951 + 0.0251 * D - 0.03644 * Math.pow(D, 2) + 0.005303 * Math.pow(D, 3) - 0.0002492 * Math.pow(D, 4);
+                arm = Math.max(0.56, Math.min(1.0, raw_arm));
+                ew = getWaterEps(T, wave);
+                eps_water_ref = ew; 
+            } else if (pType === 'snow') {
+                arm = parseFloat(document.getElementById('num-snow-arm').value);
+                mw_frac = parseFloat(document.getElementById('num-snow-meltwater').value);
+
+                const rho_i = 917.0;
+                eps_i = C(3.17, 0.001);
+
+                const eps_i_minus_1 = eps_i.sub(C(1));
+                const eps_i_plus_2 = eps_i.add(C(2));
+                const eps_i_frac = eps_i_minus_1.div(eps_i_plus_2);
+                const density_ratio = density / rho_i;
+
+                const num_term = eps_i_frac.mulScalar(2 * density_ratio);
+                const den_term = eps_i_frac.mulScalar(density_ratio);
+
+                const eps_sn = C(1).add(num_term).div(C(1).sub(den_term));
+                eps_w_0C = getWaterEps(0, wave);
+                eps_water_ref = eps_w_0C; 
+
+                const fmw = mw_frac * 0.01;
+                const fvw = (density * fmw) / (1000.0 - 1000.0 * fmw + density * fmw);
+
+                if (mix_form === 'mg') {
+                    if (mg_bg === 'snow') {
+                        const diff = eps_w_0C.sub(eps_sn);
+                        const denom = eps_w_0C.add(eps_sn.mulScalar(2));
+                        const term = diff.div(denom);
+                        const num = C(1).add(term.mulScalar(2 * fvw));
+                        const den = C(1).sub(term.mulScalar(fvw));
+                        ew = eps_sn.mul(num).div(den);
+                    } else {
+                        const diff = eps_sn.sub(eps_w_0C);
+                        const denom = eps_sn.add(eps_w_0C.mulScalar(2));
+                        const term = diff.div(denom);
+                        const num = C(1).add(term.mulScalar(2 * (1 - fvw)));
+                        const den = C(1).sub(term.mulScalar(1 - fvw));
+                        ew = eps_w_0C.mul(num).div(den);
+                    }
+                } else {
+                    const fvs = 1 - fvw;
+                    const a = -2 * fvs - 2 * fvw;
+                    const b_term1 = eps_w_0C.mulScalar(-fvs);
+                    const b_term2 = eps_sn.mulScalar(2 * fvs);
+                    const b_term3 = eps_sn.mulScalar(-fvw);
+                    const b_term4 = eps_w_0C.mulScalar(2 * fvw);
+                    const b = b_term1.add(b_term2).add(b_term3).add(b_term4);
+                    const c_term1 = eps_sn.mul(eps_w_0C).mulScalar(fvs);
+                    const c_term2 = eps_sn.mul(eps_w_0C).mulScalar(fvw);
+                    const c = c_term1.add(c_term2);
+                    const d = b.mul(b).sub(c.mulScalar(4 * a));
+                    const sqrt_d = d.sqrt();
+                    const num = b.mulScalar(-1).sub(sqrt_d);
+                    ew = num.div(C(2 * a));
+                }
+            } else if (pType === 'hail') {
+                arm = parseFloat(document.getElementById('num-hail-arm').value);
+                mw_frac = parseFloat(document.getElementById('num-hail-meltwater').value);
+                
+                const rho_i = 917.0;
+                const rho_w = 1000.0;
+                const fmw = mw_frac * 0.01;
+                
+                const Ice_mass = (pi/6) * rho_i * Math.pow(D, 3) * (1 - fmw);
+                const Water_mass = (pi/6) * rho_i * Math.pow(D, 3) * fmw;
+                
+                const D_inner = Math.pow((6 * Ice_mass) / (pi * rho_i), 1/3);
+                const zeta = Math.pow(D_inner / D, 3);
+                
+                a_inner = D_inner * Math.pow(arm, 2/3);
+                b_inner = D_inner * Math.pow(arm, -1/3);
+                a_outer = D * Math.pow(arm, 2/3);
+                b_outer = D * Math.pow(arm, -1/3);
+                
+                if ((a_outer - a_inner) <= 0.5) {
+                    AR_outer = arm;
+                } else {
+                    const a_outer_new = a_inner + 0.5;
+                    const total_equiv_vol = ((6 * Water_mass) / (pi * rho_w)) + Math.pow(D_inner, 3);
+                    const b_outer_new = Math.sqrt(total_equiv_vol / a_outer_new);
+                    AR_outer = a_outer_new / b_outer_new;
+                }
+
+                AR_outer = Math.max(AR_outer, 0.56); 
+                AR_outer = Math.min(AR_outer, arm);  
+                
+                let la_inner, lb_inner;
+                if (arm < 1.0) {
+                    const x_in = Math.sqrt(Math.pow(1.0 / arm, 2) - 1.0);
+                    la_inner = ((1 + Math.pow(x_in, 2)) / Math.pow(x_in, 2)) * (1 - Math.atan(x_in) / x_in);
+                    lb_inner = 0.5 * (1 - la_inner);
+                } else {
+                    la_inner = 1.0 / 3.0;
+                    lb_inner = 1.0 / 3.0;
+                }
+                
+                let la_outer, lb_outer;
+                if (AR_outer < 1.0) {
+                    const x_out = Math.sqrt(Math.pow(1.0 / AR_outer, 2) - 1.0);
+                    la_outer = ((1 + Math.pow(x_out, 2)) / Math.pow(x_out, 2)) * (1 - Math.atan(x_out) / x_out);
+                    lb_outer = 0.5 * (1 - la_outer);
+                } else {
+                    la_outer = 1.0 / 3.0;
+                    lb_outer = 1.0 / 3.0;
+                }
+
+                eps_w_0C = getWaterEps(0, wave);
+                eps_i = C(3.17, 0.001);
+                eps_water_ref = eps_w_0C;
+                ew = eps_water_ref; 
+
+                const coeff = (pi * pi * Math.pow(D, 3)) / (6 * Math.pow(wave, 2));
+
+                const calcScattering = (L_inner, L_outer) => {
+                    const eps_in = eps_i;
+                    const eps_out = eps_w_0C;
+                    const diff_eps = eps_in.sub(eps_out); 
+                    const L_diff = L_inner - zeta * L_outer; 
+                    
+                    const eps_out_minus_1 = eps_out.sub(C(1));
+                    const termA = eps_out.add(diff_eps.mulScalar(L_diff)); 
+                    
+                    const num_part1 = eps_out_minus_1.mul(termA);
+                    const num_part2 = eps_out.mul(diff_eps).mulScalar(zeta);
+                    const num = num_part1.add(num_part2);
+                    
+                    const termB = C(1).add(eps_out_minus_1.mulScalar(L_outer)); 
+                    
+                    const den_part1 = termA.mul(termB);
+                    const den_part2 = eps_out.mul(diff_eps).mulScalar(zeta * L_outer);
+                    const den = den_part1.add(den_part2);
+                    
+                    return num.div(den).mulScalar(coeff);
+                };
+
+                fhh = calcScattering(lb_inner, lb_outer);
+                fvv = calcScattering(la_inner, la_outer);
+            }
+
+            const sig = (pi / 180) * sigma;
+            const uu = Math.exp(-2.0 * Math.pow(sig, 2));
+            const ang1 = 0.25 * Math.pow(1 + uu, 2);
+            const ang2 = 0.25 * (1 - Math.pow(uu, 2));
+            const ang3 = Math.pow(0.375 + 0.5 * uu + 0.125 * Math.pow(uu, 4), 2);
+            const ang4 = (0.375 - 0.5 * uu + 0.125 * Math.pow(uu, 4)) * (0.375 + 0.5 * uu + 0.125 * Math.pow(uu, 4));
+            const ang5 = 0.125 * (0.375 + 0.5 * uu + 0.125 * Math.pow(uu, 4)) * (1 - Math.pow(uu, 4));
+            const ang7 = 0.5 * uu * (1 + uu);
+
+            if (pType !== 'hail') {
+                let la, lb;
+                if (arm < 1.0) {
+                    const x = Math.sqrt(Math.pow(1.0 / arm, 2) - 1.0);
+                    la = ((1 + Math.pow(x, 2)) / Math.pow(x, 2)) * (1 - Math.atan(x) / x);
+                    lb = 0.5 * (1 - la);
+                } else {
+                    la = 1.0 / 3.0;
+                    lb = 1.0 / 3.0;
+                }
+
+                const coeff = (pi * pi * Math.pow(D, 3)) / (6 * Math.pow(wave, 2));
+                const eps_minus_1_inv = ew.sub(C(1)).inv();
+
+                const fhh_denom = C(lb).add(eps_minus_1_inv);
+                fhh = fhh_denom.inv().mulScalar(coeff);
+
+                const fvv_denom = C(la).add(eps_minus_1_inv);
+                fvv = fvv_denom.inv().mulScalar(coeff);
+            }
+
+            const kw_complex = eps_water_ref.sub(C(1)).div(eps_water_ref.add(C(2)));
+            const kw = Math.pow(kw_complex.abs(), 2);
+            const cz = (4.0 * Math.pow(wave, 4)) / (Math.pow(pi, 4) * kw);
+
+            const abs_fhh_sq = Math.pow(fhh.abs(), 2);
+            const diff_fhh_fvv = fhh.sub(fvv);
+            const abs_diff_sq = Math.pow(diff_fhh_fvv.abs(), 2);
+            const conj_fhh_mul_diff = fhh.conj().mul(diff_fhh_fvv);
+            const real_part = conj_fhh_mul_diff.r;
+
+            const zh = cz * (abs_fhh_sq - 2.0 * ang2 * real_part + ang4 * abs_diff_sq);
+            const zv = cz * (abs_fhh_sq - 2.0 * ang1 * real_part + ang3 * abs_diff_sq);
+
+            const zh_dbz = 10 * Math.log10(zh);
+            const zdr = 10 * Math.log10(zh / zv);
+
+            const ckdp = (0.18 / pi) * wave;
+            const kdp = ckdp * ang7 * diff_fhh_fvv.r;
+
+            const ldr_linear = (cz * (ang5 * abs_diff_sq)) / zh;
+            const ldr = 10 * Math.log10(ldr_linear);
+
+            const ca = 8.686e-3 * wave;
+            const ah_term = fhh.sub(diff_fhh_fvv.mulScalar(ang2));
+            const ah = ca * ah_term.i;
+
+            const d_term1 = C(abs_fhh_sq + ang5 * abs_diff_sq, 0);
+            const d_term2 = fhh.conj().mul(diff_fhh_fvv).mulScalar(ang1);
+            const d_term3 = fhh.mul(diff_fhh_fvv.conj()).mulScalar(ang2);
+            const delta_cov = d_term1.sub(d_term2).sub(d_term3).mulScalar(cz);
+            const rhv = delta_cov.abs() / Math.sqrt(zh * zv);
+
+            const rp = (D * Math.sqrt(ew.abs())) / wave;
+
+            const display_AR = pType === 'hail' ? AR_outer : arm;
+            const Dh = D * Math.pow(display_AR, -1/3);
+            const Dv = D * Math.pow(display_AR, 2/3);
+
+            // --- Update UI Text Output ---
+            const warningEl = document.getElementById('rayleigh-warning');
+            if (rp > 0.6) {
+                warningEl.classList.remove('hidden');
+                document.getElementById('rp-value').innerText = rp.toFixed(3);
+            } else {
+                warningEl.classList.add('hidden');
+            }
+
+            document.getElementById('out-zh').innerText = zh_dbz.toFixed(2);
+            document.getElementById('out-zdr').innerText = zdr.toFixed(3);
+            document.getElementById('out-kdp').innerText = kdp.toExponential(3);
+            document.getElementById('out-ldr').innerText = ldr === -Infinity ? "-∞" : ldr.toFixed(2);
+            document.getElementById('out-ah').innerText = ah.toExponential(3);
+            document.getElementById('out-rhv').innerText = rhv.toFixed(5);
+            
+            if (pType === 'hail') {
+                document.getElementById('out-eps-i').innerText = `${eps_i.r.toFixed(3)} / ${eps_i.i.toFixed(3)}`;
+                document.getElementById('out-eps-w').innerText = `${eps_w_0C.r.toFixed(3)} / ${eps_w_0C.i.toFixed(3)}`;
+                document.getElementById('out-ar-outer').innerText = AR_outer.toFixed(3);
+            } else {
+                document.getElementById('out-ew-real').innerText = ew.r.toFixed(4);
+                document.getElementById('out-ew-imag').innerText = ew.i.toFixed(4);
+            }
+
+            // --- Draw Background Radar Grid (Once) ---
+            if (!radarGridDrawn) {
+                const gridG = document.getElementById('radar-grid');
+                const cx = 100, cy = 100, r = 70;
+                
+                // Draw 5 concentric rings (largest to smallest)
+                for(let step = 5; step >= 1; step--) {
+                    const frac = step / 5;
+                    let pts = "";
+                    for(let i=0; i<6; i++) {
+                        const a = i * Math.PI / 3 - Math.PI / 2;
+                        pts += `${cx + r * frac * Math.cos(a)},${cy + r * frac * Math.sin(a)} `;
+                    }
+                    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    poly.setAttribute('points', pts.trim());
+                    if (step % 2 !== 0) poly.setAttribute('fill', '#f8fafc'); // subtle striped bands
+                    else poly.setAttribute('fill', '#ffffff');
+                    gridG.appendChild(poly);
+                }
+                
+                // Draw 6 axis lines
+                for(let i=0; i<6; i++) {
+                    const a = i * Math.PI / 3 - Math.PI / 2;
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', cx);
+                    line.setAttribute('y1', cy);
+                    line.setAttribute('x2', cx + r * Math.cos(a));
+                    line.setAttribute('y2', cy + r * Math.sin(a));
+                    gridG.appendChild(line);
+                }
+                radarGridDrawn = true;
+            }
+
+            // --- Update Radar Plot Data ---
+            const norm = (val, min, max) => Math.max(0, Math.min(1, (val - min) / (max - min)));
+            
+            const logKdp = kdp > 0 ? Math.log10(kdp) : -6;
+            const logAh = ah > 0 ? Math.log10(ah) : -8;
+            const safeLdr = isFinite(ldr) ? ldr : -40;
+
+            const norms = [
+                norm(zh_dbz, -20, 80),     // 0°: Z_H
+                norm(zdr, 0, 6),           // 60°: Z_DR
+                norm(logKdp, -6, 2),       // 120°: log10(K_dp)
+                norm(safeLdr, -40, -10),   // 180°: LDR
+                norm(logAh, -8, 0),        // 240°: log10(A_H)
+                norm(rhv, 0.95, 1.0)       // 300°: Rho_hv
+            ];
+
+            const cx = 100, cy = 100, r = 70;
+            let polyPoints = "";
+            for(let i=0; i<6; i++) {
+                const a = i * Math.PI / 3 - Math.PI / 2;
+                polyPoints += `${cx + r * norms[i] * Math.cos(a)},${cy + r * norms[i] * Math.sin(a)} `;
+            }
+            document.getElementById('radar-poly').setAttribute('points', polyPoints.trim());
+
+            // --- Update SVG Visualizer ---
+            const base_ry = 8 * display_AR;
+            
+            document.getElementById('svg-ellipse').setAttribute('opacity', '0');
+            document.getElementById('svg-ellipse-snow').setAttribute('opacity', '0');
+            document.getElementById('svg-ellipse-hail-shell').setAttribute('opacity', '0');
+            document.getElementById('svg-ellipse-hail-core').setAttribute('opacity', '0');
+
+            if (pType === 'rain') {
+                document.getElementById('svg-ellipse').setAttribute('ry', base_ry);
+                document.getElementById('svg-ellipse').setAttribute('opacity', '0.8');
+            } else if (pType === 'snow') {
+                document.getElementById('svg-ellipse').setAttribute('ry', base_ry);
+                document.getElementById('svg-ellipse-snow').setAttribute('ry', base_ry);
+                
+                const waterOpacity = 0.8 * (mw_frac / 100);
+                const snowOpacity = 1.0 - (mw_frac / 100);
+                document.getElementById('svg-ellipse').setAttribute('opacity', waterOpacity.toString());
+                document.getElementById('svg-ellipse-snow').setAttribute('opacity', snowOpacity.toString());
+            } else if (pType === 'hail') {
+                document.getElementById('svg-ellipse-hail-shell').setAttribute('ry', base_ry);
+                
+                const Dh_hail = D * Math.pow(AR_outer, -1/3);
+                
+                const core_rx = 8 * (b_inner / Dh_hail);
+                const core_ry = 8 * (a_inner / Dh_hail);
+                
+                document.getElementById('svg-ellipse-hail-core').setAttribute('rx', isNaN(core_rx) ? 0 : core_rx);
+                document.getElementById('svg-ellipse-hail-core').setAttribute('ry', isNaN(core_ry) ? 0 : core_ry);
+                
+                document.getElementById('svg-ellipse-hail-shell').setAttribute('opacity', '0.8');
+                document.getElementById('svg-ellipse-hail-core').setAttribute('opacity', '1.0');
+            }
+            
+            // Update Horizontal Line & Text
+            document.getElementById('svg-line-h').setAttribute('y1', base_ry + 2);
+            document.getElementById('svg-line-h').setAttribute('y2', base_ry + 2);
+            document.getElementById('svg-text-h').setAttribute('y', base_ry + 4.5);
+            document.getElementById('svg-text-h').textContent = `${Dh.toFixed(2)} mm`;
+
+            // Update Vertical Line & Text
+            document.getElementById('svg-line-v').setAttribute('y1', -base_ry);
+            document.getElementById('svg-line-v').setAttribute('y2', base_ry);
+            document.getElementById('svg-text-v').textContent = `${Dv.toFixed(2)} mm`;
+        }
+
+        // --- Event Listener Binding ---
+        function toggleInputs() {
+            const pType = document.querySelector('input[name="ptype"]:checked').value;
+            
+            // Update Diameter Limits dynamically
+            const dLimits = { 'rain': 8.0, 'snow': 30.0, 'hail': 50.0 };
+            const newMax = dLimits[pType];
+            
+            const numD = document.getElementById('num-D');
+            const rangeD = document.getElementById('range-D');
+            
+            numD.max = newMax;
+            rangeD.max = newMax;
+            
+            // Safety clamp: if switching to a category with a lower max, scale current value down
+            if (parseFloat(numD.value) > newMax) {
+                numD.value = newMax;
+                rangeD.value = newMax;
+            }
+
+            // Hide all
+            document.getElementById('rain-inputs').classList.add('hidden');
+            document.getElementById('snow-inputs').classList.add('hidden');
+            document.getElementById('hail-inputs').classList.add('hidden');
+            document.getElementById('dielectric-standard').classList.add('hidden');
+            document.getElementById('dielectric-hail').classList.add('hidden');
+
+            // Show relevant
+            if (pType === 'rain') {
+                document.getElementById('rain-inputs').classList.remove('hidden');
+                document.getElementById('dielectric-standard').classList.remove('hidden');
+            } else if (pType === 'snow') {
+                document.getElementById('snow-inputs').classList.remove('hidden');
+                document.getElementById('dielectric-standard').classList.remove('hidden');
+            } else {
+                document.getElementById('hail-inputs').classList.remove('hidden');
+                document.getElementById('dielectric-hail').classList.remove('hidden');
+            }
+            calculate();
+        }
+
+        function toggleMGOpts() {
+            const form = document.getElementById('select-mixing').value;
+            if (form === 'mg') {
+                document.getElementById('mg-options').classList.remove('hidden');
+            } else {
+                document.getElementById('mg-options').classList.add('hidden');
+            }
+            calculate();
+        }
+
+        function syncInputs(numId, rangeId) {
+            const numEl = document.getElementById(numId);
+            const rangeEl = document.getElementById(rangeId);
+
+            numEl.addEventListener('input', (e) => {
+                rangeEl.value = e.target.value;
+                calculate();
+            });
+
+            rangeEl.addEventListener('input', (e) => {
+                numEl.value = e.target.value;
+                calculate();
+            });
+        }
+
+        // Setup sync for all controls
+        syncInputs('num-D', 'range-D');
+        syncInputs('num-T', 'range-T');
+        syncInputs('num-wave', 'range-wave');
+        syncInputs('num-sigma', 'range-sigma');
+        
+        // Snow controls
+        syncInputs('num-snow-arm', 'range-snow-arm');
+        syncInputs('num-density', 'range-density');
+        syncInputs('num-snow-meltwater', 'range-snow-meltwater');
+
+        // Hail controls
+        syncInputs('num-hail-arm', 'range-hail-arm');
+        syncInputs('num-hail-meltwater', 'range-hail-meltwater');
+
+        // Initial Calculation
+        calculate();
+    </script>
+</body>
+</html>
