@@ -516,8 +516,71 @@
         <div class="pt-6 pb-2 text-center text-sm text-slate-500">
             For feedback and/or questions, please contact: <span class="font-semibold text-slate-700"><a href="https://inside.nssl.noaa.gov/profiles/entry/carlin-jacob/">Jacob Carlin</a></span> | <a href="mailto:jacob.carlin@noaa.gov" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">jacob.carlin@noaa.gov</a>
         </div>
+        
+        <!-- Live Visit Counter -->
+        <div class="pb-6 text-center text-xs text-slate-400 font-medium">
+            Dashboard Visits: <span id="visit-counter" class="font-mono text-[#0046AB]">...</span>
+        </div>
     </div>
 
+    <!-- Firebase Connection for Counter -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        if (firebaseConfigStr) {
+            try {
+                const firebaseConfig = JSON.parse(firebaseConfigStr);
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+
+                const initAuth = async () => {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+
+                initAuth();
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (!user) return;
+
+                    const counterRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'visits');
+
+                    // Check flag to avoid massive over-counting while you are hot-reloading the preview during edits
+                    if (!window.dashboardVisitCounted) {
+                        await setDoc(counterRef, { count: increment(1) }, { merge: true }).catch(err => console.error("Error incrementing:", err));
+                        window.dashboardVisitCounted = true;
+                    }
+
+                    // Setup real-time listener
+                    onSnapshot(counterRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            const count = docSnap.data().count;
+                            const counterEl = document.getElementById('visit-counter');
+                            if (counterEl) {
+                                counterEl.innerText = count.toLocaleString();
+                            }
+                        }
+                    }, (error) => {
+                        console.error("Error listening to counter:", error);
+                    });
+                });
+            } catch (error) {
+                console.error("Error initializing visit counter:", error);
+            }
+        }
+    </script>
+
+    <!-- Main Logic Script -->
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
@@ -998,7 +1061,7 @@
             });
         }
 
-        // Setup sync for all controls //
+        // Setup sync for all controls
         syncInputs('num-D', 'range-D');
         syncInputs('num-T', 'range-T');
         syncInputs('num-wave', 'range-wave');
