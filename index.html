@@ -79,14 +79,15 @@
                         <div class="flex items-center gap-2">
                             <i data-lucide="radio" class="w-4 h-4 text-[#0046AB]"></i>
                             Radar Wavelength
+                            <span id="band-badge" class="bg-blue-100 text-[#003c80] text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ml-1">S Band</span>
                         </div>
                         <div class="flex items-center gap-1">
-                            <input type="number" id="num-wave" value="110.0" min="10" max="200" step="1"
+                            <input type="number" id="num-wave" value="110.0" min="10" max="200" step="0.1"
                                 class="w-20 px-2 py-1 text-right border border-slate-200 rounded-md text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0046AB] focus:border-transparent" />
                             <span class="text-slate-400 text-sm">mm</span>
                         </div>
                     </div>
-                    <input type="range" id="range-wave" min="10" max="200" step="1" value="110.0"
+                    <input type="range" id="range-wave" min="10" max="200" step="0.1" value="110.0"
                         class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
                 </div>
 
@@ -267,7 +268,7 @@
                 <!-- Main Result Cards & Radar Plot Layout -->
                 <div class="flex flex-col gap-6">
                     
-                    <!-- Variable Cards Column -->
+                    <!-- Variable Cards Column (5 items, no A_H) -->
                     <div class="grid grid-cols-1 gap-3">
                         <!-- Reflectivity -->
                         <div class="bg-white border border-slate-200 rounded-xl py-3 px-5 shadow-sm flex items-center justify-between relative overflow-hidden group">
@@ -317,18 +318,6 @@
                             </div>
                         </div>
 
-                        <!-- Specific Attenuation (AH) -->
-                        <div class="bg-white border border-slate-200 rounded-xl py-3 px-5 shadow-sm flex items-center justify-between relative overflow-hidden group">
-                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-[#5d7d9e]/40 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
-                            <div class="relative z-10 text-slate-500 font-semibold text-sm md:text-base">
-                                Specific Attenuation (A<sub>H</sub>)
-                            </div>
-                            <div class="relative z-10 text-right flex items-baseline gap-1.5">
-                                <div id="out-ah" class="text-2xl font-bold text-[#003c80] leading-none mb-0.5">0.00e+0</div>
-                                <div class="text-sm font-medium text-slate-400 leading-none">dB / km</div>
-                            </div>
-                        </div>
-
                         <!-- Correlation Coefficient (Rho_hv) -->
                         <div class="bg-white border border-slate-200 rounded-xl py-3 px-5 shadow-sm flex items-center justify-between relative overflow-hidden group">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-[#5d7d9e]/40 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
@@ -342,31 +331,28 @@
                         </div>
                     </div>
 
-                    <!-- Radar Plot Column -->
+                    <!-- Radar Plot Column (Pentagon) -->
                     <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col items-center">
                         <div class="relative flex items-center justify-center w-full max-w-[380px] my-2">
                             <svg viewBox="0 0 200 200" class="w-full overflow-visible text-[#0046AB]">
                                 <!-- Drawn by JS -->
                                 <g id="radar-grid" stroke="#cbd5e1" stroke-width="0.5" fill="none"></g>
                                 
-                                <!-- Axes Labels (Scaled up and nudged out to prevent clipping) -->
+                                <!-- Axes Labels -->
                                 <text x="100" y="10" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">Z<tspan baseline-shift="sub" font-size="7.5">H</tspan></text>
                                 <text x="100" y="20" text-anchor="middle" font-size="7" fill="#94a3b8">[-20, 80]</text>
 
-                                <text x="180" y="52" text-anchor="start" font-size="10" font-weight="bold" fill="#475569">Z<tspan baseline-shift="sub" font-size="7.5">DR</tspan></text>
-                                <text x="180" y="62" text-anchor="start" font-size="7" fill="#94a3b8">[0, 6]</text>
+                                <text x="180" y="70" text-anchor="start" font-size="10" font-weight="bold" fill="#475569">Z<tspan baseline-shift="sub" font-size="7.5">DR</tspan></text>
+                                <text x="180" y="80" text-anchor="start" font-size="7" fill="#94a3b8">[0, 6]</text>
 
-                                <text x="180" y="138" text-anchor="start" font-size="10" font-weight="bold" fill="#475569">log₁₀(K<tspan baseline-shift="sub" font-size="7.5">dp</tspan>)</text>
-                                <text x="180" y="148" text-anchor="start" font-size="7" fill="#94a3b8">[-6, 2]</text>
+                                <text x="150" y="165" text-anchor="start" font-size="10" font-weight="bold" fill="#475569">log₁₀(K<tspan baseline-shift="sub" font-size="7.5">dp</tspan>)</text>
+                                <text x="150" y="175" text-anchor="start" font-size="7" fill="#94a3b8">[-6, 2]</text>
 
-                                <text x="100" y="186" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">LDR</text>
-                                <text x="100" y="196" text-anchor="middle" font-size="7" fill="#94a3b8">[-40, -10]</text>
+                                <text x="50" y="165" text-anchor="end" font-size="10" font-weight="bold" fill="#475569">LDR</text>
+                                <text x="50" y="175" text-anchor="end" font-size="7" fill="#94a3b8">[-40, -10]</text>
 
-                                <text x="20" y="138" text-anchor="end" font-size="10" font-weight="bold" fill="#475569">log₁₀(A<tspan baseline-shift="sub" font-size="7.5">H</tspan>)</text>
-                                <text x="20" y="148" text-anchor="end" font-size="7" fill="#94a3b8">[-8, 0]</text>
-
-                                <text x="20" y="52" text-anchor="end" font-size="10" font-weight="bold" fill="#475569">ρ<tspan baseline-shift="sub" font-size="7.5">hv</tspan></text>
-                                <text x="20" y="62" text-anchor="end" font-size="7" fill="#94a3b8">[0.95, 1.0]</text>
+                                <text x="20" y="70" text-anchor="end" font-size="10" font-weight="bold" fill="#475569">ρ<tspan baseline-shift="sub" font-size="7.5">hv</tspan></text>
+                                <text x="20" y="80" text-anchor="end" font-size="7" fill="#94a3b8">[0.95, 1.0]</text>
 
                                 <!-- Plot Data -->
                                 <polygon id="radar-poly" points="" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
@@ -495,11 +481,15 @@
                             <li>For melting hail, a meltwater torus is approximated using Eq. (32) of <a href="https://doi.org/10.1175/JAS-D-25-0014.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Carlin and Ryzhkov (2025)</a>, 
                                 which adapts the meltwater model of <a href="https://doi.org/10.1175/JAMC-D-17-036.2.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Kumjian et al. (2018)</a> to meltwater values less than the critical threshold. 
                                 This model evenly distributes the liquid water around the hailstone whose shape is supplied by the user. If the meltwater thickness is <span>&#8804;</span> 0.5 mm, the water remains evenly distributed. Otherwise, 
-                                the meltwater thickness at the top and bottom of the particle are fixed at 0.5 mm and is allowed to increase on the particle’s equator down to a minimum axis ratio of 0.56. </li>
+                                the meltwater thickness at the top and bottom of the particle are fixed at 0.5 mm and is allowed to increase on the particle’s equator down to a minimum axis ratio of 0.56. Once the water volume exceeds that of the ice volume, the axis ratio is assumed
+                                to linearly evolve toward that of a raindrop of equal mass.</li>
+                            <li>In order to prevent unrealistic amounts of liquid water on large hailstones, the maximum allowable meltwater mass fraction is limited to that corresponding to the critical meltwater threshold of 
+                                <a href="https://doi.org/10.1175/1520-0469(1987)044<2754:MASOGA>2.0.CO;2" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Rasmussen and Heymsfield (1987)</a>, which assumes all water in excess of this limit is instantaneously shed.</li>
                         </ul>
                     <p><u>Scattering</u>:</p>
                         <ul class="list-disc pl-5 space-y-2">
-                            <li>For simplicity, Rayleigh scattering is assumed for all particles; a warning will pop up to alert users when this condition is being violated (defined by the Resonance Parameter (RP) exceeding 0.6).</li>
+                            <li>For simplicity, Rayleigh scattering is assumed for all particles; a warning will pop up to alert users when this condition is being violated (defined by the Resonance Parameter (RP) exceeding 0.6). In addition to neglecting resonance effects in Z, Z<sub>DR</sub>, and K<sub>dp</sub>, this assumption and 
+                            the treatment of particlesas smooth spheroids will knowingly result in unrealistically high <span>&#961;</span><sub>hv</sub> values. Additionally, the Rayleigh scattering assumption results in erroneously low values of specific attenuation (A<sub>H</sub>), which has therefore been excluded. </li>
                             <li>For rain and snow/graupel, the Rayleigh forward- and back-scattering amplitudes are calculated according to Eq. (22) of <a href="https://doi.org/10.1175/2010JAMC2363.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Ryzhkov et al. (2011)</a>.</li>
                             <li>For hail, the two-layer spheroid model of <a href="https://doi.org/10.1002/9783527618156" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Bohren and Huffman (1983)</a> 
                                 following Eq. (28) of <a href="https://doi.org/10.1175/2010JAMC2363.1" class="text-[#0046AB] hover:text-[#003c80] hover:underline transition-colors">Ryzhkov et al. (2011)</a>. </li>
@@ -587,6 +577,16 @@
             const mg_bg = document.getElementById('select-mg-bg').value;
             const pi = Math.PI;
 
+            // --- Update Radar Band Badge ---
+            const bandBadge = document.getElementById('band-badge');
+            if (wave > 150) bandBadge.innerText = 'L Band';
+            else if (wave >= 75) bandBadge.innerText = 'S Band';
+            else if (wave >= 37.5) bandBadge.innerText = 'C Band';
+            else if (wave >= 25) bandBadge.innerText = 'X Band';
+            else if (wave >= 16.7) bandBadge.innerText = 'Ku Band';
+            else if (wave >= 11.1) bandBadge.innerText = 'K Band';
+            else bandBadge.innerText = 'Ka Band';
+
             let ew, arm, mw_frac = 0;
             let eps_water_ref; 
             let eps_w_0C, eps_i, AR_outer = 1.0;
@@ -654,10 +654,32 @@
                 }
             } else if (pType === 'hail') {
                 arm = parseFloat(document.getElementById('num-hail-arm').value);
-                mw_frac = parseFloat(document.getElementById('num-hail-meltwater').value);
                 
                 const rho_i = 917.0;
                 const rho_w = 1000.0;
+                
+                // --- Rasmussen and Heymsfield (1983) Shedding Limit ---
+                const M_tot_kg = (pi / 6) * rho_i * Math.pow(D / 1000.0, 3); // D in meters for kg
+                const f_max = (0.268e-4 + 0.1389 * M_tot_kg) / (M_tot_kg * 1.1389);
+                const max_mw_percent = Math.floor(Math.min(100, Math.max(0, f_max * 100)));
+
+                const numMw = document.getElementById('num-hail-meltwater');
+                const rangeMw = document.getElementById('range-hail-meltwater');
+                
+                // Update UI limits
+                numMw.max = max_mw_percent;
+                rangeMw.max = max_mw_percent;
+
+                // Option A: Auto-snap if current value exceeds new maximum
+                let currentMw = parseFloat(numMw.value);
+                if (currentMw > max_mw_percent) {
+                    currentMw = max_mw_percent;
+                    numMw.value = currentMw;
+                    rangeMw.value = currentMw;
+                }
+                mw_frac = currentMw;
+                // ------------------------------------------------------
+                
                 const fmw = mw_frac * 0.01;
                 
                 const Ice_mass = (pi/6) * rho_i * Math.pow(D, 3) * (1 - fmw);
@@ -682,6 +704,23 @@
 
                 AR_outer = Math.max(AR_outer, 0.56); 
                 AR_outer = Math.min(AR_outer, arm);  
+                
+                // --- NEW AXIS RATIO TRANSITION LOGIC ---
+                const vi = Ice_mass / rho_i;
+                const vw = Water_mass / rho_w;
+                
+                if (vw > vi) {
+                    const M_tot = Ice_mass + Water_mass;
+                    const D_eq = Math.pow((6 * M_tot) / (pi * rho_w), 1/3); // Equivalent liquid drop diameter
+                    
+                    // Calculate expected rain axis ratio for Deq using Brandes et al. (2005)
+                    const raw_arm_rain = 0.9951 + 0.0251 * D_eq - 0.03644 * Math.pow(D_eq, 2) + 0.005303 * Math.pow(D_eq, 3) - 0.0002492 * Math.pow(D_eq, 4);
+                    const axis_ratio_rain = Math.max(0.56, Math.min(1.0, raw_arm_rain));
+                    
+                    // Smoothly transition between 2-layer AR and pure rain AR
+                    AR_outer = AR_outer + (axis_ratio_rain - AR_outer) * ((vw - vi) / (vw + vi));
+                }
+                // ---------------------------------------
                 
                 let la_inner, lb_inner;
                 if (arm < 1.0) {
@@ -788,10 +827,6 @@
             const ldr_linear = (cz * (ang5 * abs_diff_sq)) / zh;
             const ldr = 10 * Math.log10(ldr_linear);
 
-            const ca = 8.686e-3 * wave;
-            const ah_term = fhh.sub(diff_fhh_fvv.mulScalar(ang2));
-            const ah = ca * ah_term.i;
-
             const d_term1 = C(abs_fhh_sq + ang5 * abs_diff_sq, 0);
             const d_term2 = fhh.conj().mul(diff_fhh_fvv).mulScalar(ang1);
             const d_term3 = fhh.mul(diff_fhh_fvv.conj()).mulScalar(ang2);
@@ -817,7 +852,6 @@
             document.getElementById('out-zdr').innerText = zdr.toFixed(3);
             document.getElementById('out-kdp').innerText = kdp.toExponential(3);
             document.getElementById('out-ldr').innerText = ldr === -Infinity ? "-∞" : ldr.toFixed(2);
-            document.getElementById('out-ah').innerText = ah.toExponential(3);
             document.getElementById('out-rhv').innerText = rhv.toFixed(5);
             
             if (pType === 'hail') {
@@ -834,12 +868,12 @@
                 const gridG = document.getElementById('radar-grid');
                 const cx = 100, cy = 100, r = 70;
                 
-                // Draw 5 concentric rings (largest to smallest)
+                // Draw 5 concentric rings (largest to smallest) for 5-axis pentagon
                 for(let step = 5; step >= 1; step--) {
                     const frac = step / 5;
                     let pts = "";
-                    for(let i=0; i<6; i++) {
-                        const a = i * Math.PI / 3 - Math.PI / 2;
+                    for(let i=0; i<5; i++) {
+                        const a = i * 2 * Math.PI / 5 - Math.PI / 2;
                         pts += `${cx + r * frac * Math.cos(a)},${cy + r * frac * Math.sin(a)} `;
                     }
                     const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
@@ -849,9 +883,9 @@
                     gridG.appendChild(poly);
                 }
                 
-                // Draw 6 axis lines
-                for(let i=0; i<6; i++) {
-                    const a = i * Math.PI / 3 - Math.PI / 2;
+                // Draw 5 axis lines
+                for(let i=0; i<5; i++) {
+                    const a = i * 2 * Math.PI / 5 - Math.PI / 2;
                     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                     line.setAttribute('x1', cx);
                     line.setAttribute('y1', cy);
@@ -862,26 +896,24 @@
                 radarGridDrawn = true;
             }
 
-            // --- Update Radar Plot Data ---
+            // --- Update Radar Plot Data (5 Axes) ---
             const norm = (val, min, max) => Math.max(0, Math.min(1, (val - min) / (max - min)));
             
             const logKdp = kdp > 0 ? Math.log10(kdp) : -6;
-            const logAh = ah > 0 ? Math.log10(ah) : -8;
             const safeLdr = isFinite(ldr) ? ldr : -40;
 
             const norms = [
                 norm(zh_dbz, -20, 80),     // 0°: Z_H
-                norm(zdr, 0, 6),           // 60°: Z_DR
-                norm(logKdp, -6, 2),       // 120°: log10(K_dp)
-                norm(safeLdr, -40, -10),   // 180°: LDR
-                norm(logAh, -8, 0),        // 240°: log10(A_H)
-                norm(rhv, 0.95, 1.0)       // 300°: Rho_hv
+                norm(zdr, 0, 6),           // 72°: Z_DR
+                norm(logKdp, -6, 2),       // 144°: log10(K_dp)
+                norm(safeLdr, -40, -10),   // 216°: LDR
+                norm(rhv, 0.95, 1.0)       // 288°: Rho_hv
             ];
 
             const cx = 100, cy = 100, r = 70;
             let polyPoints = "";
-            for(let i=0; i<6; i++) {
-                const a = i * Math.PI / 3 - Math.PI / 2;
+            for(let i=0; i<5; i++) {
+                const a = i * 2 * Math.PI / 5 - Math.PI / 2;
                 polyPoints += `${cx + r * norms[i] * Math.cos(a)},${cy + r * norms[i] * Math.sin(a)} `;
             }
             document.getElementById('radar-poly').setAttribute('points', polyPoints.trim());
